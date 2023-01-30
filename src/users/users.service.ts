@@ -1,22 +1,41 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UsersRepository } from './users.repository';
-
-// This should be a real class/interface representing a user entity
-export type User = any;
+import { QueryFailedError, Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { User } from './user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(UsersRepository)
-    private usersRepository: UsersRepository,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
   ) {}
 
-  async findOneByEmail(email: string): Promise<User | undefined> {
+  async findOneByEmail(email: string) {
     return this.usersRepository.findOneBy({ email });
   }
 
   async createUser(email: string, password: string) {
-    this.usersRepository.createUser(email, password);
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
+    const user = this.usersRepository.create({
+      email,
+      password: hashedPassword,
+    });
+    try {
+      await this.usersRepository.save(user);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        // if (error.code === '23505') {
+        // duplicate email
+        throw new ConflictException('email already exists');
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
   }
 }
