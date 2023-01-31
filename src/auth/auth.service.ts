@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { JwtPayload } from './jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +13,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(email: string, password: string): Promise<Partial<User>> {
     const user = await this.usersService.findOneByEmail(email);
     if (user && (await bcrypt.compare(password, user.password))) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -28,8 +30,13 @@ export class AuthService {
     );
   }
 
-  async signIn(user: any) {
-    const payload = { email: user.email, id: user.id };
+  async signIn(authCredentialsDto: AuthCredentialsDto) {
+    const { email, password } = authCredentialsDto;
+    const user = await this.validateUser(email, password);
+    if (!user) {
+      throw new UnauthorizedException('Please check your login credentials');
+    }
+    const payload: JwtPayload = { email: email, id: user.id };
     return {
       accessToken: this.jwtService.sign(payload),
     };

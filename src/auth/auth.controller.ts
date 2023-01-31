@@ -9,7 +9,6 @@ import {
 import { AuthService } from './auth.service';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { LocalAuthGuard } from './local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -20,11 +19,11 @@ export class AuthController {
     return this.authService.signUp(authCredentialsDto);
   }
 
-  @UseGuards(LocalAuthGuard)
   @Post('/signin')
-  signIn(@Request() req): Promise<{ accessToken: string }> {
-    console.log('req.user', req.user);
-    return this.authService.signIn(req.user);
+  signIn(
+    @Body() authCredentialsDto: AuthCredentialsDto,
+  ): Promise<{ accessToken: string }> {
+    return this.authService.signIn(authCredentialsDto);
   }
 
   @UseGuards(JwtAuthGuard)
