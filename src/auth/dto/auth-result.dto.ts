@@ -1,9 +1,12 @@
 import { Expose } from 'class-transformer';
 
-export class UserDto {
+export class AuthResultDto {
   @Expose()
   id: string;
 
   @Expose()
   email: string;
+
+  @Expose()
+  accessToken: string;
 }

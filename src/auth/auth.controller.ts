@@ -1,6 +1,6 @@
 import { Body, Controller, Post, UseGuards, Get } from '@nestjs/common';
 import { Serialize } from 'src/serialize.interceptor';
-import { UserDto } from 'src/users/dto/user.dto';
+import { AuthResultDto } from 'src/auth/dto/auth-result.dto';
 import { GetUser } from 'src/users/get-user.decorator';
 import { User } from 'src/users/user.entity';
 import { AuthService } from './auth.service';
@@ -8,7 +8,7 @@ import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
-@Serialize(UserDto)
+@Serialize(AuthResultDto)
 export class AuthController {
   constructor(private authService: AuthService) {}
 
