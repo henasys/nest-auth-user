@@ -31,6 +31,8 @@ NestJS + typeORM + postgres
 - auth
 - users
 
+ref: [NestJS Zero to Hero - Task Management Application](https://github.com/arielweinberger/nestjs-course-task-management)
+
 ## Installation
 
 ```bash
